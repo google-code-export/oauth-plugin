@@ -26,7 +26,7 @@ module OAuth
     
     def perform(consumer_secret,token_secret=nil,realm=nil,body=nil)
       http_klass=(@uri.scheme=="https" ? Net::HTTPS : Net::HTTP)
-      http_klass.start(@uri.host) do |http|
+      http_klass.start(@uri.host,@uri.port) do |http|
         sign(consumer_secret,token_secret)
         
         # TODO if realm is set use auth header
