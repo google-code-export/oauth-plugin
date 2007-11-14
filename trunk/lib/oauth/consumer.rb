@@ -18,7 +18,7 @@ module OAuth
     #
     # When user returns create an access_token
     #
-    # <pre>@access_token=@reques_token.access_token
+    # <pre>@access_token=@request_token.access_token
     # @photos=@access_token.get('http://test.com/photos.xml')</pre>
     #
     #
