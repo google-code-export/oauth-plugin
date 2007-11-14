@@ -1,0 +1,63 @@
+OAuth Plugin
+=====
+
+This is the beginning of a plugin for implementing both OAuth clients and servers in Rails applications.
+
+See the OAuth specs at:
+
+http://oauth.googlecode.com/svn/spec/branches/1.0/drafts/5/spec.html
+
+and the OAuth site at:
+
+http://oauth.net
+
+What is done:
+
+* Create and authenticate RequestTokens
+* Exchange RequestToken for an AccessToken
+* Simple http wrapper built into RequestToken (this is likely to change)
+
+Still todo:
+
+* Improve error handling (it's virtually non existant)
+* Support Authorization header in 5.4 of the spec
+* Create better support for Provider side.
+* Generators to create Token AR models
+* Generators to create OAuth consumer and provider controllers
+* Integrate with ActiveResource by including AccessToken support in the ActiveResource::Connection class.
+
+Example
+=======
+
+Create a new consumer instance by passing it a configuration hash:
+
+@consumer=OAuth::Consumer.new( {
+    :consumer_key=>"key",
+    :consumer_secret=>"secret",
+    :request_token=>"http://term.ie/oauth/example/request_token.php",
+    :access_token=>"http://term.ie/oauth/example/access_token.php",
+    :authorize=>"http://term.ie/oauth/example/authorize.php"
+    })
+
+Start the process by requesting a token
+
+  @request_token=@consumer.request_token
+  session[:request_token]=@request_token
+  redirect_to @request_token.authorize_url
+
+When user returns create an access_token
+
+  @access_token=@reques_token.access_token
+  @photos=@access_token.get('http://test.com/photos.xml')</pre>
+
+
+More
+====
+
+The Google Code project is http://code.google.com/p/oauth-plugin/
+
+Please help documentation, patches and testing.
+
+Copyright (c) 2007 Pelle Braendgaard, released under the MIT license
+
+Certain parts of this has been inspired (and kind of stole from Blaine Cooke and Larry Halff's OAuth library)
