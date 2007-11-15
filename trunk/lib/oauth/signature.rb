@@ -1,6 +1,10 @@
 require 'cgi'
 require 'hmac' # make sure to install: sudo gem install ruby-hmac
 require 'hmac-sha1'
+require 'hmac-md5'
+require 'hmac-sha2'
+require 'hmac-rmd160'
+
 require 'base64'
 module OAuth
   # Much of this code has been blatantly stolen fron Blaine Cooke of Twitter and Larry Halff of ma.gnolia.com
@@ -12,14 +16,25 @@ module OAuth
       when 'hmac-sha1': OAuth::Signature::HashedMessageAuth::SHA1
       when 'hmac-sha2': OAuth::Signature::HashedMessageAuth::SHA2
       when 'hmac-rmd160': OAuth::Signature::HashedMessageAuth::RMD160
-      when 'plaintext': OAuth::Signature::PLAINTEXT
+      when 'plaintext': 
+        if oauth_request.uri.scheme=="https"
+          OAuth::Signature::PLAINTEXT
+        else
+          raise InsecureSignatureMethod
+        end
       when 'rsa-sha1': OAuth::Signature::RSA::SHA1
+      when 'sha1': raise InsecureSignatureMethod, oauth_request.signature_method
+      when 'md5': raise InsecureSignatureMethod, oauth_request.signature_method
       else
         raise UnknownSignatureMethod, oauth_request.signature_method
       end
 
       klass.new(oauth_request,consumer_secret,token_secret)
     end
+
+    class UnknownSignatureMethod < Exception; end
+
+    class InsecureSignatureMethod < Exception; end
 
     class Base
     
@@ -77,12 +92,8 @@ module OAuth
         base_string
       end
 
-      def base_string(redact_secrets = false)
-        if redact_secrets
-          "CONSUMER_SECRET&TOKEN_SECRET" # I don't see where the spec says to do this...
-        else
-          "#{escape(consumer_secret)}&#{escape(token_secret)}"
-        end
+      def base_string
+        "#{escape(consumer_secret)}&#{escape(token_secret)}"
       end
 
       private

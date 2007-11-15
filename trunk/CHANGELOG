@@ -1,0 +1,10 @@
+revision: 6
+
+- Throws InsecureSignatureMethod exception if attempting to use straight sha1 or md5.
+- Disables plaintext signature over http (throws an InsecureSignatureMethod)
+- Better testing of signature methods - the prior tests were seriously flawed.
+
+revision: 5
+
+- Removed support for sha1 and md5
+- Implemented draft 6 support of OAuth removing secrets from base string
