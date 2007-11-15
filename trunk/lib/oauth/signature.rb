@@ -8,8 +8,6 @@ module OAuth
   module Signature
     def self.create(oauth_request,consumer_secret,token_secret=nil)
       klass = case oauth_request.signature_method.downcase
-      when 'md5': OAuth::Signature::MD5
-      when 'sha1': OAuth::Signature::SHA1
       when 'hmac-md5': OAuth::Signature::HashedMessageAuth::MD5
       when 'hmac-sha1': OAuth::Signature::HashedMessageAuth::SHA1
       when 'hmac-sha2': OAuth::Signature::HashedMessageAuth::SHA2
@@ -34,7 +32,7 @@ module OAuth
       end
     
       def base_string
-        [@request.http_method,@request.normalized_url,@request.to_query_string_without_signature,consumer_secret,token_secret].collect{|p| @request.escape(p)}.join('&')
+        [@request.http_method,@request.normalized_url,@request.to_query_string_without_signature].collect{|p| @request.escape(p)}.join('&')
       end
     
       def key
@@ -73,16 +71,6 @@ module OAuth
       end
     end
     
-    class MD5 < Base
-      private
-      def digest_class; Digest::MD5; end
-    end
-
-    class SHA1 < Base
-      private
-      def digest_class; Digest::SHA1; end
-    end
-
     class PLAINTEXT < Base
 
       def sign
