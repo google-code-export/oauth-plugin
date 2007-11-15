@@ -29,7 +29,7 @@ class OAuthSignatureTest < Test::Unit::TestCase
     assert_equal "tR3+Ty81lMeYAr/Fid0kMTYa/WM=",@signature.sign
   end
   
-  def test_sign_hmac_sha1
+  def test_sign_hmac_sha1  
     assert !@request.signed?
     assert !@signature.verify?
     @signature.sign!
@@ -39,6 +39,8 @@ class OAuthSignatureTest < Test::Unit::TestCase
 
   def test_sign_hmac_md5
     @request.signature_method="hmac-md5"
+    @signature=OAuth::Signature.create(@request,@consumer_secret,@token_secret)
+    
     assert !@request.signed?
     assert !@signature.verify?
     @signature.sign!
@@ -48,6 +50,8 @@ class OAuthSignatureTest < Test::Unit::TestCase
 
   def test_sign_hmac_sha2
     @request.signature_method="hmac-sha2"
+    @signature=OAuth::Signature.create(@request,@consumer_secret,@token_secret)
+    
     assert !@request.signed?
     assert !@signature.verify?
     @signature.sign!
@@ -57,6 +61,8 @@ class OAuthSignatureTest < Test::Unit::TestCase
 
   def test_sign_hmac_rmd160
     @request.signature_method="hmac-rmd160"
+    @signature=OAuth::Signature.create(@request,@consumer_secret,@token_secret)
+    
     assert !@request.signed?
     assert !@signature.verify?
     @signature.sign!
@@ -64,31 +70,37 @@ class OAuthSignatureTest < Test::Unit::TestCase
     assert @signature.verify?
   end
 
-  def test_sign_plain
+  def test_sign_plain_with_https
+    @request.url='https://photos.example.net/photos?file=vacation.jpg&size=original'
     @request.signature_method="plaintext"
+    @signature=OAuth::Signature.create(@request,@consumer_secret,@token_secret)
+    
     assert !@request.signed?
     assert !@signature.verify?
     @signature.sign!
     assert @request.signed?
     assert @signature.verify?
+  end
+
+  def test_sign_plain_with_http
+    @request.signature_method="plaintext"
+    assert_raise(OAuth::Signature::InsecureSignatureMethod) do
+      OAuth::Signature.create(@request,@consumer_secret,@token_secret)
+    end
   end
 
   def test_sign_sha1
     @request.signature_method="sha1"
-    assert !@request.signed?
-    assert !@signature.verify?
-    @signature.sign!
-    assert @request.signed?
-    assert @signature.verify?
+    assert_raise(OAuth::Signature::InsecureSignatureMethod) do
+      OAuth::Signature.create(@request,@consumer_secret,@token_secret)
+    end
   end
 
   def test_sign_md5
     @request.signature_method="md5"
-    assert !@request.signed?
-    assert !@signature.verify?
-    @signature.sign!
-    assert @request.signed?
-    assert @signature.verify?
+    assert_raise(OAuth::Signature::InsecureSignatureMethod) do
+      OAuth::Signature.create(@request,@consumer_secret,@token_secret)
+    end
   end
 
 end
