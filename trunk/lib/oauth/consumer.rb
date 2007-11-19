@@ -34,9 +34,19 @@ module OAuth
     
     # Create a Request Token
     def request_token
-      request=OAuth::Request.new(http_method,request_token_path,{:oauth_consumer_key=>self.key})
+      request=create_request(request_token_path)
       response=request.perform_token_request(self.secret)
       OAuth::RequestToken.new(self,response[:oauth_token],response[:oauth_token_secret])
+    end
+    
+    def create_request(url,params={})
+      OAuth::Request.new(http_method,url,params.merge({:oauth_consumer_key=>self.key}))
+    end
+
+    def signed_request(url,params={},token_secret=nil)
+      request=create_request(url,params)
+      request.sign(self.secret,token_secret)
+      request
     end
     
     def request_token_path

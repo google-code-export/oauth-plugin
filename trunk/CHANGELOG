@@ -1,3 +1,7 @@
+revision: 7
+
+- Done a lot of work on the Server side of things. The Server class has changed a lot and is likely to be incompatible with previous versions
+
 revision: 6
 
 - Throws InsecureSignatureMethod exception if attempting to use straight sha1 or md5.

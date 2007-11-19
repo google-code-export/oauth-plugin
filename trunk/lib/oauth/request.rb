@@ -24,6 +24,11 @@ module OAuth
       self[:oauth_nonce]=generate_key(24) unless self.nonce
     end
     
+    # This takes a rails like Request and returns an OAuth request object
+    def self.incoming(http_request)
+      Request.new(http_request.method,"http://#{http_request.host_with_port}#{http_request.path}",http_request.parameters)
+    end
+    
     def perform(consumer_secret,token_secret=nil,realm=nil,body=nil)
       http_klass=(@uri.scheme=="https" ? Net::HTTPS : Net::HTTP)
       http_klass.start(@uri.host,@uri.port) do |http|
@@ -31,9 +36,9 @@ module OAuth
         
         # TODO if realm is set use auth header
         if (['POST','PUT'].include?(http_method))
-          http.send(http_method.downcase.to_sym,@uri.path,to_query_string,headers)
+          http.send(http_method.downcase.to_sym,@uri.path,to_query,headers)
         else # any request without a body
-          http.send(http_method.downcase.to_sym,"#{@uri.path}?#{to_query_string}",headers)
+          http.send(http_method.downcase.to_sym,"#{@uri.path}?#{to_query}",headers)
         end
       end
     end
@@ -70,7 +75,7 @@ module OAuth
     
     # produces an array of "key=value"s for the uri_params
     def uri_parameters
-      params = uri.query.nil? ? [] : uri.query.split('&') 
+      params = uri.query.nil? ? {}: CGI.parse(uri.query).inject({}){|h,(k,v)| h[k]=v[0];h}
     end
     
     def normalized_url
@@ -106,13 +111,17 @@ module OAuth
     def to_name_value_pair_array(hash,with={})
       hash.merge(with).collect{|(key,value)| "#{escape(key.to_s)}=#{escape(value)}"}.sort
     end
+
+    def to_hash(with={})
+      params.merge(uri_parameters).merge(with)
+    end
     
-    def to_query_string(with={})
-      (to_name_value_pair_array(params,with)+uri_parameters).sort.join("&")
+    def to_query(with={})
+      (to_name_value_pair_array(to_hash(with))).sort.join("&")
     end
 
-    def to_query_string_without_signature(with={})
-      (to_name_value_pair_array(params_without_signature,with)+uri_parameters).sort.join("&")
+    def to_query_without_signature(with={})
+      (to_name_value_pair_array(params_without_signature,with)).sort.join("&")
     end
 
     def to_auth_string(with={})
@@ -120,11 +129,11 @@ module OAuth
     end
     
     def to_base_string(secret)
-      to_query_string({:oauth_secret=>secret})
+      to_query({:oauth_secret=>secret})
     end
 
     def params_without_signature
-      params.reject{|key,value| key==:oauth_signature}
+      to_hash.reject{|key,value| key==:oauth_signature}
     end
     
     def signature
@@ -155,10 +164,5 @@ module OAuth
       OAuth::Signature.create(self,consumer_secret,token_secret).verify?
     end
     
-    # Based on Blaine's example from the Oauth mailing list
-    def escape(value)
-      CGI.escape(value.to_s).gsub("%7E", "~").gsub("+", "%20")
-    end
-
   end
 end

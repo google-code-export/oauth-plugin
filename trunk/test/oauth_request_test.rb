@@ -1,4 +1,6 @@
 require 'test/unit'
+require 'action_controller'
+require 'action_controller/test_process'
 require 'oauth'
 class OAuthRequestTest < Test::Unit::TestCase
   def setup
@@ -17,8 +19,8 @@ class OAuthRequestTest < Test::Unit::TestCase
     assert_equal @request['string_key'],"should be set"    
   end
   
-  def test_to_query_string
-    assert_equal "oauth_field1=test&oauth_field2=hello&oauth_nonce=#{URI.escape(@request.nonce)}&oauth_signature_method=HMAC-SHA1&oauth_timestamp=#{@request.timestamp}&oauth_version=1.0&picture=test.png&string_key=should%20be%20set&stuff=1",@request.to_query_string
+  def test_to_query
+    assert_equal "oauth_field1=test&oauth_field2=hello&oauth_nonce=#{URI.escape(@request.nonce)}&oauth_signature_method=HMAC-SHA1&oauth_timestamp=#{@request.timestamp}&oauth_version=1.0&picture=test.png&string_key=should%20be%20set&stuff=1",@request.to_query
   end
 
   def test_to_auth_string
@@ -97,6 +99,35 @@ class OAuthRequestTest < Test::Unit::TestCase
     @request.sign(@consumer_secret)    
     assert @request.signed?
     assert @request.verify?(@consumer_secret)    
+    orig_sig=@request.signature
+    
+    @incoming=mock_incoming_request(@request)
+    assert_equal "photos.example.net",@incoming.host_with_port
+    assert_equal "/photos",@incoming.path
+    assert_equal :get,@incoming.method
+    assert_equal( {"file"=>"vacation.jpg",
+      "size"=>"original",
+      "oauth_consumer_key"=>"dpf43f3p2l4k3l03",
+      'oauth_timestamp'=>@request[:oauth_timestamp],
+      "oauth_nonce"=>@request[:oauth_nonce],
+      "oauth_signature_method"=>'HMAC-SHA1',
+      "oauth_version"=>"1.0",
+      "oauth_signature"=>orig_sig
+      },@incoming.parameters)
+    
+    @request=OAuth::Request.incoming(@incoming)
+    assert @request.signed?
+    assert @request.verify?(@consumer_secret)
+    assert_equal orig_sig,@request.signature
+  end
+  
+  def mock_incoming_request(request)
+    incoming=ActionController::TestRequest.new(@request.to_hash)
+    incoming.request_uri=@request.uri.path
+    incoming.env["SERVER_PORT"]=@request.uri.port
+    incoming.host=@request.uri.host
+    incoming.env['REQUEST_METHOD']=@request.http_method
+    incoming
   end
   
   def test_sign_access_token
@@ -114,6 +145,5 @@ class OAuthRequestTest < Test::Unit::TestCase
     assert @request.signed?
     assert @request.verify?(@consumer_secret,@token_secret)    
   end
-  
   
 end

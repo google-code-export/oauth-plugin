@@ -3,14 +3,28 @@ module OAuth
   # Superclass for the various tokens used by OAuth
   
   class Token
+    include OAuth::Key
+    
     attr_accessor :token, :secret
 
     def initialize(token, secret)
       @token = token
       @secret = secret
     end
+    
+    def to_query
+      "oauth_token=#{escape(token)}&oauth_secret=#{escape(secret)}"
+    end
+    
   end
   
+  # Used on the server for generating tokens
+  class ServerToken<Token
+    
+    def initialize
+      super generate_key(16),generate_key
+    end
+  end
   # Superclass for tokens used by OAuth Clients
   class ConsumerToken<Token
     attr_accessor :consumer
@@ -32,7 +46,7 @@ module OAuth
     
     # exchange for AccessToken on server
     def access_token
-      request=OAuth::Request.new(consumer.http_method,consumer.access_token_path,{:oauth_consumer_key=>consumer.key,:oauth_token=>self.token})
+      request=consumer.create_request(consumer.access_token_path,{:oauth_token=>self.token})
       response=request.perform_token_request(consumer.secret,self.secret)
       OAuth::AccessToken.new(consumer,response[:oauth_token],response[:oauth_token_secret])
     end
