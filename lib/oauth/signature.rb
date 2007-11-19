@@ -37,7 +37,8 @@ module OAuth
     class InsecureSignatureMethod < Exception; end
 
     class Base
-    
+      include OAuth::Key
+      
       attr_accessor :request
 
       def initialize(request,consumer_secret,token_secret=nil)
@@ -47,7 +48,7 @@ module OAuth
       end
     
       def base_string
-        [@request.http_method,@request.normalized_url,@request.to_query_string_without_signature].collect{|p| @request.escape(p)}.join('&')
+        [@request.http_method,@request.normalized_url,@request.to_query_without_signature].collect{|p| @request.escape(p)}.join('&')
       end
     
       def key
@@ -76,10 +77,6 @@ module OAuth
       end
       
       protected
-      
-      def escape(value)
-        @request.escape(value)
-      end
       
       def digest
         digest_class.digest(base_string)

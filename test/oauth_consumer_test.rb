@@ -23,6 +23,23 @@ class OAuthConsumerTest < Test::Unit::TestCase
     assert_equal :post,@consumer.http_method
   end
   
+  def test_create_request
+    request=@consumer.create_request 'http://term.ie/oauth/example/request_token.php'
+    assert_equal 'http://term.ie/oauth/example/request_token.php',request.url
+    assert "key",request[:consumer_key]
+    assert !request.signed?
+  end
+  
+  def test_signed_request
+    request=@consumer.signed_request 'http://term.ie/oauth/example/request_token.php'
+    assert_equal 'http://term.ie/oauth/example/request_token.php',request.url
+    assert "key",request[:consumer_key]
+    assert request.signed?
+    assert request.signed?
+    assert request.verify?(@consumer.secret)    
+    
+  end
+  
   def test_get_token_sequence
     @request_token=@consumer.request_token
     assert_not_nil @request_token
