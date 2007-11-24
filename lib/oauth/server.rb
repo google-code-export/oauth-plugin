@@ -5,9 +5,9 @@ module OAuth
     attr_accessor :base_url
     
     @@server_paths={
-      :request_token=>"/oauth/request_token",
-      :authorize=>"/oauth/authorize",
-      :access_token=>"/oauth/access_token"
+      :request_token_path=>"/oauth/request_token",
+      :authorize_path=>"/oauth/authorize",
+      :access_token_path=>"/oauth/access_token"
     }
     # Create a new server instance
     def initialize(base_url,paths={})
@@ -23,19 +23,20 @@ module OAuth
       ConsumerCredentials.new( *generate_credentials)
     end
 
-    def create_consumer(params={})
+    def create_consumer
       credentials=generate_credentials
       Consumer.new( {
+        :site=>base_url,
         :consumer_key=>credentials[0],
         :consumer_secret=>credentials[1],
-        :request_token=>request_token_url,
-        :authorize=>authorize_url,
-        :access_token=>access_token_url
+        :request_token_path=>request_token_path,
+        :authorize_path=>authorize_path,
+        :access_token_path=>access_token_path
       })
     end
         
     def request_token_path
-      @paths[:request_token]
+      @paths[:request_token_path]
     end
     
     def request_token_url
@@ -43,7 +44,7 @@ module OAuth
     end
     
     def authorize_path
-      @paths[:authorize]
+      @paths[:authorize_path]
     end
     
     def authorize_url
@@ -51,7 +52,7 @@ module OAuth
     end
     
     def access_token_path
-      @paths[:access_token]
+      @paths[:access_token_path]
     end
 
     def access_token_url

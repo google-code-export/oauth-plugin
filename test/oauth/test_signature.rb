@@ -1,6 +1,6 @@
 require 'test/unit'
 require 'oauth'
-class OAuthSignatureTest < Test::Unit::TestCase
+class SignatureTest < Test::Unit::TestCase
   def setup
     # From example in Apendix A of the spec
     @consumer_secret="kd94hf93k423kf44"
@@ -12,7 +12,7 @@ class OAuthSignatureTest < Test::Unit::TestCase
       :oauth_nonce=>"kllo9940pd9333jh"
     }
     
-    @request=OAuth::Request.new( :get,'http://photos.example.net/photos?file=vacation.jpg&size=original', @test_params)
+    @request=OAuth::Request.new( :get,'http://photos.example.net','/photos?file=vacation.jpg&size=original', @test_params)
     @signature=OAuth::Signature.create(@request,@consumer_secret,@token_secret)
   end
   
@@ -71,7 +71,7 @@ class OAuthSignatureTest < Test::Unit::TestCase
   end
 
   def test_sign_plain_with_https
-    @request.url='https://photos.example.net/photos?file=vacation.jpg&size=original'
+    @request.site='https://photos.example.net'
     @request.signature_method="plaintext"
     @signature=OAuth::Signature.create(@request,@consumer_secret,@token_secret)
     
