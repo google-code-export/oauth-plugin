@@ -1,6 +1,6 @@
 require 'test/unit'
 require 'oauth'
-class OAuthServerTest < Test::Unit::TestCase
+class ServerTest < Test::Unit::TestCase
   def setup
     @server=OAuth::Server.new "http://test.com"
   end
@@ -28,14 +28,18 @@ class OAuthServerTest < Test::Unit::TestCase
     assert_not_nil @consumer
     assert_not_nil @consumer.key
     assert_not_nil @consumer.secret
-    assert_equal "http://test.com/oauth/request_token",@consumer.request_token_path
-    assert_equal "http://test.com/oauth/authorize",@consumer.authorize_path
-    assert_equal "http://test.com/oauth/access_token",@consumer.access_token_path
+    assert_equal "http://test.com",@consumer.site
+    assert_equal "/oauth/request_token",@consumer.request_token_path
+    assert_equal "/oauth/authorize",@consumer.authorize_path
+    assert_equal "/oauth/access_token",@consumer.access_token_path
+    assert_equal "http://test.com/oauth/request_token",@consumer.request_token_url
+    assert_equal "http://test.com/oauth/authorize",@consumer.authorize_url
+    assert_equal "http://test.com/oauth/access_token",@consumer.access_token_url
   end  
   
   def test_verify_request
-    @consumer=@server.create_consumer
-    @request=@consumer.signed_request @consumer.request_token_path
+    @consumer=@server.create_consumer 
+    @request=@consumer.signed_request :get,@consumer.request_token_path
     assert @request.signed?
     
     assert @request.verify?(@consumer.secret)

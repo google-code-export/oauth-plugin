@@ -5,6 +5,7 @@ module OAuth
     def initialize(key, secret)
       @key = key
       @secret = secret
+      raise ArgumentError, 'Missing consumer credentials ("key and/or secret")' unless @key && @secret
     end
   end
   

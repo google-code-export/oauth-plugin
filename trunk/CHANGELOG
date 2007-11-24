@@ -1,3 +1,8 @@
+revision: 8
+- moved tests into oauth folder and renamed them to make them work with autotest by default
+- Refactored the request methods to make them more flexible and ready for integrating with ActiveResource
+- There are a few tests that fail. All of them to do with put and post requests with payload data. I decided to commit anyway, to get the new api out.
+
 revision: 7
 
 - Done a lot of work on the Server side of things. The Server class has changed a lot and is likely to be incompatible with previous versions
