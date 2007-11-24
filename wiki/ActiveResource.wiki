@@ -1,4 +1,4 @@
-#summary Thoughs on ActiveResource support
+#summary Thoughts on ActiveResource support
 
 = Introduction =
 
