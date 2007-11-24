@@ -1,0 +1,15 @@
+#summary Thoughs on ActiveResource support
+
+= Introduction =
+
+ActiveResource is the Rails 2.0 way of doing REST web services from the client side. It would be great to be able to support OAuth directly in ActiveResource through a plugin.
+
+[http://weblog.techno-weenie.net/2006/12/12/taking-ares-out-for-a-test-drive TechnoWeenie's run down of ActiveResource]
+
+= Details =
+
+To use ActiveResource with OAuth you would need an AccessToken issued for the user already.
+
+My idea is that you should be able to some how be able to set the access_token like you would set a site today.
+
+AccessToken supports most of the methods of the ActiveResource::Connection object so it should just really be a matter of wiring it up.
