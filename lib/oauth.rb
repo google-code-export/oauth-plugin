@@ -7,6 +7,7 @@ require 'oauth/consumer_credentials'
 require 'oauth/consumer'
 require 'oauth/server'
 require 'oauth/token'
+require 'oauth/test_helper'
 
 module OAuth
   

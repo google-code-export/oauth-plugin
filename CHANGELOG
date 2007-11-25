@@ -1,3 +1,6 @@
+revision 9
+- added a test helper. Include OAuth::TestHelper in your tests or specs to mock incoming requests
+
 revision: 8
 - moved tests into oauth folder and renamed them to make them work with autotest by default
 - Refactored the request methods to make them more flexible and ready for integrating with ActiveResource

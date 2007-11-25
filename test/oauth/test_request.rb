@@ -5,6 +5,7 @@ require 'action_controller/test_process'
 require 'oauth'
 class RequestTest < Test::Unit::TestCase
   include OAuth::Key
+  include OAuth::TestHelper
   
   def setup
     @request=OAuth::Request.new( :get,"http://test.COM:80","/oauth?stuff=1&picture=test.png", {:realm=>'http://test.com/oauth/authorize',:oauth_field1=>"test",:oauth_field2=>"hello",'string_key'=>"should be set"})
@@ -242,26 +243,7 @@ class RequestTest < Test::Unit::TestCase
     assert @request.verify?(@consumer_secret)
     assert_equal orig_sig,@request.signature
   end
-  
-  def mock_incoming_request_with_query(request)
-    incoming=ActionController::TestRequest.new(request.to_hash)
-    incoming.request_uri=request.path
-    incoming.env["SERVER_PORT"]=request.uri.port
-    incoming.host=request.uri.host
-    incoming.env['REQUEST_METHOD']=request.http_method
-    incoming
-  end
-
-  def mock_incoming_request_with_authorize_header(request)
-    incoming=ActionController::TestRequest.new
-    incoming.env["HTTP_AUTHORIZATION"]=request.to_auth_string
-    incoming.request_uri=request.path
-    incoming.env["SERVER_PORT"]=request.uri.port
-    incoming.host=request.uri.host
-    incoming.env['REQUEST_METHOD']=request.http_method
-    incoming
-  end
-  
+    
   def test_sign_access_token
     @consumer_secret="kd94hf93k423kf44"
     @token_secret="pfkkdhi9sl3r4s00"
