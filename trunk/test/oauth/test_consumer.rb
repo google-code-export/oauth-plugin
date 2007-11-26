@@ -79,7 +79,7 @@ class ConsumerTest < Test::Unit::TestCase
     assert_equal "token",request[:oauth_token]
     assert_equal "BODY",request.body
     assert request.signed?
-    assert request.verify?(@consumer.secret)        
+    assert request.verify?(@consumer.secret,'token secret')        
   end
   
   def test_create_signed_put_request
@@ -87,7 +87,7 @@ class ConsumerTest < Test::Unit::TestCase
     assert_equal "token",request[:oauth_token]
     assert_equal "BODY",request.body
     assert request.signed?
-    assert request.verify?(@consumer.secret)        
+    assert request.verify?(@consumer.secret,'token secret')        
   end
   
   def test_get_token_sequence
@@ -104,10 +104,12 @@ class ConsumerTest < Test::Unit::TestCase
     
     @response=@access_token.get("/oauth/example/echo_api.php?ok=hello&test=this")
     assert_not_nil @response
+    assert_equal "200",@response.code
     assert_equal( "ok=hello&test=this",@response.body)
-
+    
     @response=@access_token.post("/oauth/example/echo_api.php","ok=hello&test=this")
     assert_not_nil @response
+    assert_equal "200",@response.code
     assert_equal( "ok=hello&test=this",@response.body)
     
   end

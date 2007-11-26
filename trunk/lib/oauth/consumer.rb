@@ -30,27 +30,27 @@ module OAuth
     
     # Create a new consumer instance by passing it a configuration hash:
     #
-    #<pre> @consumer=OAuth::Consumer.new( {
-    #    :consumer_key=>"key",
-    #    :consumer_secret=>"secret",
-    #    :site=>"http://term.ie",
-    #    :auth_method=>:authorize,
-    #    :http_method=>:post,
-    #    :request_token_path=>"/oauth/example/request_token.php",
-    #    :access_token_path=>"/oauth/example/access_token.php",
-    #    :authorize_path=>"/oauth/example/authorize.php"
-    #    })</pre>
+    #   @consumer=OAuth::Consumer.new( {
+    #     :consumer_key=>"key",
+    #     :consumer_secret=>"secret",
+    #     :site=>"http://term.ie",
+    #     :auth_method=>:authorize,
+    #     :http_method=>:post,
+    #     :request_token_path=>"/oauth/example/request_token.php",
+    #     :access_token_path=>"/oauth/example/access_token.php",
+    #     :authorize_path=>"/oauth/example/authorize.php"
+    #    })
     #
     # Start the process by requesting a token
     #
-    # <pre>@request_token=@consumer.request_token
-    # session[:request_token]=@request_token
-    # redirect_to @request_token.authorize_url</pre>
+    #   @request_token=@consumer.request_token
+    #   session[:request_token]=@request_token
+    #   redirect_to @request_token.authorize_url
     #
     # When user returns create an access_token
     #
-    # <pre>@access_token=@request_token.access_token
-    # @photos=@access_token.get('http://test.com/photos.xml')</pre>
+    #   @access_token=@request_token.access_token
+    #   @photos=@access_token.get('http://test.com/photos.xml')
     #
     #
     

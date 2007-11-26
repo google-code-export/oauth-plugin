@@ -1,3 +1,7 @@
+revision 12
+- the bug with post and put has now been fixed.
+- better documentation
+
 revision 9
 - added a test helper. Include OAuth::TestHelper in your tests or specs to mock incoming requests
 
