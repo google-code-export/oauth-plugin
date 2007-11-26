@@ -4,17 +4,37 @@ module OAuth
     module ControllerMethods
       protected
       
+      def current_token
+        @current_token
+      end
+      
+      def oauthenticate
+        @current_token=ClientApplication.authorize_request?(request)
+        return false unless @current_token
+        current_user=@current_token.user
+        @current_token
+      end
+      
       # use in a before_filter
       def oauth_required
-        @token=ClientApplication.authorize_request?(request)
-        return false if @token==false
-        current_user=@token.user
-        true
+        if oauthenticate&&authorized?
+          true
+        else
+          access_denied
+        end
       end
       
       # This requies that you have an acts_as_authenticated compatible authentication plugin installed
       def login_or_oauth_required
-        login_required unless oauth_required
+        if oauthenticate
+          if authorized?
+            return true
+          else
+            access_denied
+          end
+        else
+          login_required
+        end
       end
     end
   end
