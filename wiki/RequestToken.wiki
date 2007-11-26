@@ -8,19 +8,19 @@ The RequestToken is used for the Authentication phase of the OAuth protocol
 
 This is only used from the ConsumerService side.
 
-= RequestToken lifecycle =
+==RequestToken lifecycle==
 
   # ConsumerService Request a RequestToken from the ServiceProvider using Consumer
   # Redirect user to the ServiceProvider's AuthorizationUrl with an appended token
   # User authorizes the RequestToken
   # ConsumerService exchanges RequestToken for an AccessToken
 
-= Contains
+==Contains==
 
   * token - the actual token string
   * secret - a secret string used for signing requests
 
-== Creation
+==Creation==
 
 You ask a Consumer object to request the token from the ServiceProvider
 
@@ -28,7 +28,7 @@ You ask a Consumer object to request the token from the ServiceProvider
 @request_token=@consumer.get_request_token
 }}}
 
-== Authorization
+==Authorization==
 
 Redirect the user to the authorization_url:
 
@@ -36,7 +36,7 @@ Redirect the user to the authorization_url:
 redirect_to @request_token.authorization_url
 }}}
 
-== Exchange for AccessToken
+==Exchange for AccessToken==
 
 Once the user is redirected back to the callback url you can exchange it:
 
