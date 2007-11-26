@@ -10,7 +10,7 @@ This is only used from the ConsumerService side.
 
 ==RequestToken lifecycle==
 
-  # ConsumerService Request a RequestToken from the ServiceProvider using Consumer
+  # ConsumerService Request a RequestToken from the ServiceProvider using [Consumer]
   # Redirect user to the ServiceProvider's AuthorizationUrl with an appended token
   # User authorizes the RequestToken
   # ConsumerService exchanges RequestToken for an AccessToken
