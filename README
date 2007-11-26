@@ -64,6 +64,16 @@ To find the consumer_key for a request in a rails app do:
 This example assumes an ActiveRecord Model called AccessToken with a token and a secret column.
 This is associated with a ActiveRecord Model ClientApplication (the consumer), which has a key and secret column.
 
+== OAuth Provider generator
+
+While it isn't very flexible at the moment there is an oauth_provider generator which you can use like this:
+
+./script/generate oauth_provider
+
+This generates an oauth_controller as well as the required models.
+
+It requires an authentication framework such as acts_as_authenticated, restful_authentication or restful_open_id_authentication.
+
 == More
 
 The Google Code project is http://code.google.com/p/oauth-plugin/

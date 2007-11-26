@@ -1,3 +1,6 @@
+revision 18
+- added a generator for creation oauth_providers
+
 revision 12
 - the bug with post and put has now been fixed.
 - better documentation
