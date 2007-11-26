@@ -14,40 +14,55 @@ What is done:
 
 * Create and authenticate RequestTokens
 * Exchange RequestToken for an AccessToken
-* Simple http wrapper built into RequestToken (this is likely to change)
+* Simple http wrapper built into RequestToken. This has been refactored to fit into the ActiveResource way of doing http requests.
+* Supports query and authorization headers
 
 Still todo:
 
 * Improve error handling (it's virtually non existant)
-* Support Authorization header in 5.4 of the spec
-* Create better support for Provider side.
 * Generators to create Token AR models
 * Generators to create OAuth consumer and provider controllers
 * Integrate with ActiveResource by including AccessToken support in the ActiveResource::Connection class.
 
-== Example
+== Example Consumer
 
 Create a new consumer instance by passing it a configuration hash:
 
   @consumer=OAuth::Consumer.new( {
     :consumer_key=>"key",
     :consumer_secret=>"secret",
-    :request_token=>"http://term.ie/oauth/example/request_token.php",
-    :access_token=>"http://term.ie/oauth/example/access_token.php",
-    :authorize=>"http://term.ie/oauth/example/authorize.php"
+    :site=>"http://term.ie",
+    :auth_method=>:authorize,
+    :request_token_path=>"/oauth/example/request_token.php",
+    :access_token_path=>"/oauth/example/access_token.php",
+    :authorize_path=>"/oauth/example/authorize.php"
     })
 
 Start the process by requesting a token
 
-  @request_token=@consumer.request_token
+  @request_token=@consumer.get_request_token
   session[:request_token]=@request_token
   redirect_to @request_token.authorize_url
 
 When user returns create an access_token
 
-  @access_token=@request_token.access_token
-  @photos=@access_token.get('http://test.com/photos.xml')
+  @access_token=@request_token.get_access_token
+  @photos=@access_token.get('/photos.xml')
 
+== Example Server
+
+To find the consumer_key for a request in a rails app do:
+
+  @consumer_key=OAuth::Request.extract_consumer_key(request)
+
+ To extract an OAuth::Request for a rails request in a rails app do:
+
+  @oauth_request=OAuth::Request.incoming(request)
+  @token=AccessToken.find_by_token @oauth_request.token
+  return @oauth_request.verify?(@token.client_application.secret,@token.secret)
+
+This example assumes an ActiveRecord Model called AccessToken with a token and a secret column.
+This is associated with a ActiveRecord Model ClientApplication (the consumer), which has a key and secret column.
 
 == More
 

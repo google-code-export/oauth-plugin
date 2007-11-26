@@ -205,7 +205,7 @@ class RequestTest < Test::Unit::TestCase
     orig_sig=@request.signature
     orig_base=OAuth::Signature.create(@request,@consumer_secret).base_string
     
-    orig_query_params=@request.uri_parameters
+    orig_query_params=@request.http_parameters
     
     @incoming=mock_incoming_request_with_authorize_header(@request)
     assert_equal "photos.example.net",@incoming.host_with_port
@@ -219,7 +219,7 @@ class RequestTest < Test::Unit::TestCase
     @request=OAuth::Request.incoming(@incoming)
     assert_equal '/photos?file=vacation.jpg&size=original',@request.path
     
-    assert_equal orig_query_params,@request.uri_parameters
+    assert_equal orig_query_params,@request.http_parameters
     
     # test base string
     new_base=OAuth::Signature.create(@request,@consumer_secret).base_string
@@ -259,5 +259,24 @@ class RequestTest < Test::Unit::TestCase
     assert @request.signed?
     assert @request.verify?(@consumer_secret,@token_secret)    
   end
+
+  def test_sign_post_request_url_form_encoded
+    @consumer_secret="kd94hf93k423kf44"
+    @token_secret="pfkkdhi9sl3r4s00"
+    @test_params={
+      :oauth_consumer_key=>"dpf43f3p2l4k3l03",
+      :oauth_token=>"nnch734d00sl2jdk"
+    }
+    
+    @request=OAuth::Request.new( :post,'http://photos.example.net','/photos', @test_params,"file=vacation.jpg&size=original")
+    assert_equal "application/x-www-form-urlencoded",@request.content_type
+    assert !@request.signed?
+    assert !@request.verify?(@consumer_secret,@token_secret)
+    @request.sign(@consumer_secret,@token_secret)    
+    assert @request.signed?
+    assert @request.verify?(@consumer_secret,@token_secret)
+    assert_equal "file=vacation.jpg&size=original",@request.body
+  end
+
   
 end

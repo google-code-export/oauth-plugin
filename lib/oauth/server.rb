@@ -1,5 +1,5 @@
 module OAuth
-  # This will likely all change
+  # This is mainly used to create consumer credentials and can pretty much be ignored if you want to create your own
   class Server
     include OAuth::Key
     attr_accessor :base_url
@@ -23,6 +23,7 @@ module OAuth
       ConsumerCredentials.new( *generate_credentials)
     end
 
+    # mainly for testing purposes
     def create_consumer
       credentials=generate_credentials
       Consumer.new( {

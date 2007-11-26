@@ -9,6 +9,8 @@ require 'base64'
 module OAuth
   # Much of this code has been blatantly stolen fron Blaine Cooke of Twitter and Larry Halff of ma.gnolia.com
   # and lovingly hand modified with the utmost respect.
+  
+  # You should not need to use this directly as the request object encapsulates it in the sign and verify methods
   module Signature
     def self.create(oauth_request,consumer_secret,token_secret=nil)
       klass = case oauth_request.signature_method.downcase

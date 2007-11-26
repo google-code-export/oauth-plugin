@@ -3,7 +3,26 @@ require 'cgi'
 require 'open-uri'
 require 'net/http' 
 module OAuth
-  # It should not normally be necessary to call this directly
+  # This encapsulates all the request details for OAuth.
+  #
+  # On the consumer side you shouldn't use this directly but rather Use consumer.get_request_token for the initial token
+  # and access token for actual web service calls
+  #
+  # On the service provider side there are various interesting methods.
+  #
+  # To find the consumer_key for a request in a rails app do:
+  # 
+  #   @consumer_key=OAuth::Request.extract_consumer_key(request)
+  #
+  # To extract an OAuth::Request for a rails request in a rails app do:
+  #
+  #   @oauth_request=OAuth::Request.incoming(request)
+  #   @token=AccessToken.find_by_token @oauth_request.token
+  #   return @oauth_request.verify?(@token.client_application.secret,@token.secret)
+  #
+  # This example assumes an ActiveRecord Model called AccessToken with a token and a secret column.
+  # This is associated with a ActiveRecord Model ClientApplication (the consumer), which has a key and secret column.
+  #
   class Request
     include OAuth::Key
     
@@ -24,6 +43,8 @@ module OAuth
       self.auth_method=@oauth_params.delete(:auth_method)||:authorize
       self.body=arguments.shift if ['POST','PUT'].include?(self.http_method)
       self.headers=arguments.shift||{}
+      self.headers['Content-Type']||='application/x-www-form-urlencoded' if ['POST','PUT'].include?(self.http_method)
+
       self[:oauth_timestamp]=create_timestamp unless self.timestamp
       self[:oauth_nonce]=generate_key(24) unless self.nonce
       
@@ -36,6 +57,8 @@ module OAuth
 
     end
     
+    # Use to extract the consumer key from a http request object
+    # This is intended for use on the server
     def self.extract_consumer_key(http_request)
       auth=http_request.env["HTTP_AUTHORIZATION"]
       if auth && auth[0..5]=="OAuth "&&auth=~/ oauth_consumer_key="([^, ]+)"/
@@ -60,10 +83,14 @@ module OAuth
         _path=http_request.request_uri
 #        _path=http_request.path+'?'+non_auth
       end
-      Request.new(http_request.method,"http://#{http_request.host_with_port}",_path,parameters)
+      if http_request.post?||http_request.put?
+        Request.new(http_request.method,"http://#{http_request.host_with_port}",_path,parameters,http_request.raw_post,{'Content-Type'=>http_request.content_type})
+      else
+        Request.new(http_request.method,"http://#{http_request.host_with_port}",_path,parameters)
+      end
     end
         
-    def perform(consumer_secret,token_secret=nil,realm=nil,body=nil)
+    def perform(consumer_secret,token_secret=nil)
       http_klass=(uri.scheme=="https" ? Net::HTTPS : Net::HTTP)
       http_klass.start(uri.host,uri.port) do |http|
         sign(consumer_secret,token_secret)
@@ -72,14 +99,14 @@ module OAuth
         when :query
           _path="#{uri.path}?#{to_query}"
         when :post
-          headers['content-type']='application/x-www-form-urlencoded'
-          body=to_query
+          self.body=to_query
         else
           headers['Authorization']=to_auth_string
         end
-        _path||=uri.path
+        _path||=path
         # TODO if realm is set use auth header
         if (['POST','PUT'].include?(http_method))
+#          headers['Content-Length']=body.size.to_s unless body.nil?          
           http.send(http_method.downcase.to_sym,_path,body,headers)
         else # any request without a body
           http.send(http_method.downcase.to_sym,_path,headers)
@@ -104,6 +131,10 @@ module OAuth
       @http_method
     end
     
+    def content_type
+      @content_type||=headers['Content-Type']
+    end
+    
     def site=(_site)
       @site=_site.downcase
       @uri=nil # invalidate uri
@@ -124,9 +155,13 @@ module OAuth
       (site+path)
     end
     
-    # produces an array of "key=value"s for the uri_oauth_params
-    def uri_parameters
-      oauth_params = uri.query.nil? ? {}: CGI.parse(uri.query).inject({}){|h,(k,v)| h[k.to_sym]=v[0];h}
+    # produces a hash of the query or post parameters depending on http method
+    def http_parameters
+      @http_params||=parse_url_form_encoded( body||uri.query||'') 
+    end
+    
+    def parse_url_form_encoded(string)
+      CGI.parse(string).inject({}){|h,(k,v)| h[k.to_sym]=v[0];h}
     end
     
     def normalized_url
@@ -168,7 +203,7 @@ module OAuth
     end
 
     def to_hash(with={})
-      oauth_params.merge(uri_parameters).merge(with)
+      oauth_params.merge(http_parameters).merge(with)
     end
     
     def to_query(with={})
