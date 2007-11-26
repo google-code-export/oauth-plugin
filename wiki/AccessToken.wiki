@@ -1,0 +1,54 @@
+#summary How the AccessToken api works
+
+= Introduction =
+
+The AccessToken is used for accessing Web Services using the OAuth protocol.
+
+[http://oauth.googlecode.com/svn/spec/branches/1.0/drafts/7/spec.html#anchor13 See Spec]
+
+This is only used from the ConsumerService side.
+
+==AccessToken lifecycle==
+
+  # ConsumerService Request an AccessToken from the ServiceProvider using an authorized RequestToken
+  # ConsumerService ServiceProvider's web service using the AccessToken's http request wrapper methods
+
+==Contains==
+
+  * token - the actual token string
+  * secret - a secret string used for signing requests
+
+==Creation==
+
+You ask the RequestToken to exchange it self for an AccessToken from the ServiceProvider:
+
+{{{
+@access_token=@request_token.get_access_token
+}}}
+
+==Accessing REST webservices==
+
+It wraps the ruby http/s object with simple methods for each http method:
+
+{{{
+# GET /people.xml
+@response=@access_token.get('/people.xml')
+
+# GET /people/1.xml
+@response=@access_token.get('/people/1.xml')
+
+# POST /people
+@response=@access_token.post('/people',"person[name]=Bob")
+
+# POST /people with xml
+@response=@access_token.post('/people',@person.to_xml,{'Content-Type'=>'application/xml')
+
+# PUT /people/1
+@response=@access_token.post('/people/1',"person[name]=Bob%20Smith")
+
+# PUT /people/1 with xml
+@response=@access_token.put('/people/1',@person.to_xml,{'Content-Type'=>'application/xml')
+
+# DELETE /people/1
+@response=@access_token.delete('/people/1')
+}}}
