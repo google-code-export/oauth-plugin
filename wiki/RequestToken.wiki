@@ -1,0 +1,45 @@
+#summary How the RequestToken api works
+
+= Introduction =
+
+The RequestToken is used for the Authentication phase of the OAuth protocol
+
+[http://oauth.googlecode.com/svn/spec/branches/1.0/drafts/7/spec.html#anchor9 See Spec]
+
+This is only used from the ConsumerService side.
+
+= RequestToken lifecycle =
+
+  # ConsumerService Request a RequestToken from the ServiceProvider using Consumer
+  # Redirect user to the ServiceProvider's AuthorizationUrl with an appended token
+  # User authorizes the RequestToken
+  # ConsumerService exchanges RequestToken for an AccessToken
+
+= Contains
+
+  * token - the actual token string
+  * secret - a secret string used for signing requests
+
+== Creation
+
+You ask a Consumer object to request the token from the ServiceProvider
+
+{{{
+@request_token=@consumer.get_request_token
+}}}
+
+== Authorization
+
+Redirect the user to the authorization_url:
+
+{{{
+redirect_to @request_token.authorization_url
+}}}
+
+== Exchange for AccessToken
+
+Once the user is redirected back to the callback url you can exchange it:
+
+{{{
+@access_token=@request_token.get_access_token
+}}}
