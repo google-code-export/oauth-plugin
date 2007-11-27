@@ -4,65 +4,27 @@ This is the beginning of a plugin for implementing both OAuth clients and server
 
 See the OAuth specs at:
 
-http://oauth.googlecode.com/svn/spec/branches/1.0/drafts/5/spec.html
+http://oauth.googlecode.com/svn/spec/branches/1.0/drafts/7/spec.html
 
 and the OAuth site at:
 
 http://oauth.net
 
-What is done:
+== Requirements
 
-* Create and authenticate RequestTokens
-* Exchange RequestToken for an AccessToken
-* Simple http wrapper built into RequestToken. This has been refactored to fit into the ActiveResource way of doing http requests.
-* Supports query and authorization headers
+You need to install the oauth gem
+  
+  sudo gem install oauth
 
-Still todo:
+This is a change from earlier versions that had the code within the plugin. 
 
-* Improve error handling (it's virtually non existant)
-* Generators to create Token AR models
-* Generators to create OAuth consumer and provider controllers
-* Integrate with ActiveResource by including AccessToken support in the ActiveResource::Connection class.
+The Generator currently creates code (in particular views) that only work in Rails 2.
 
-== Example Consumer
+It should not be difficult to manually modify the code to work on Rails 1.2.x
 
-Create a new consumer instance by passing it a configuration hash:
+I think the only real issue is that the views have .html.erb extensions. So these could theoretically just be renamed to .rhtml.
 
-  @consumer=OAuth::Consumer.new( {
-    :consumer_key=>"key",
-    :consumer_secret=>"secret",
-    :site=>"http://term.ie",
-    :auth_method=>:authorize,
-    :request_token_path=>"/oauth/example/request_token.php",
-    :access_token_path=>"/oauth/example/access_token.php",
-    :authorize_path=>"/oauth/example/authorize.php"
-    })
-
-Start the process by requesting a token
-
-  @request_token=@consumer.get_request_token
-  session[:request_token]=@request_token
-  redirect_to @request_token.authorize_url
-
-When user returns create an access_token
-
-  @access_token=@request_token.get_access_token
-  @photos=@access_token.get('/photos.xml')
-
-== Example Server
-
-To find the consumer_key for a request in a rails app do:
-
-  @consumer_key=OAuth::Request.extract_consumer_key(request)
-
- To extract an OAuth::Request for a rails request in a rails app do:
-
-  @oauth_request=OAuth::Request.incoming(request)
-  @token=AccessToken.find_by_token @oauth_request.token
-  return @oauth_request.verify?(@token.client_application.secret,@token.secret)
-
-This example assumes an ActiveRecord Model called AccessToken with a token and a secret column.
-This is associated with a ActiveRecord Model ClientApplication (the consumer), which has a key and secret column.
+Please let me know if this works and I will see if I can make the generator conditionally create .rhtml for pre 2.0 versions of RAIL.
 
 == OAuth Provider generator
 
@@ -78,8 +40,8 @@ It requires an authentication framework such as acts_as_authenticated, restful_a
 
 The Google Code project is http://code.google.com/p/oauth-plugin/
 
+The OAuth Ruby Gem home page is http://oauth.rubyforge.org
+
 Please help documentation, patches and testing.
 
 Copyright (c) 2007 Pelle Braendgaard, released under the MIT license
-
-Certain parts of this has been inspired (and kind of stole from Blaine Cooke and Larry Halff's OAuth library)
