@@ -1,3 +1,9 @@
+revision 23
+
+- removed all core libraries from plugin. They are now in the oauth gem.
+
+# oauth-plugin-pre-gem Branch created
+
 revision 18
 - added a generator for creation oauth_providers
 
