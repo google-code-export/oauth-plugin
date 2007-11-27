@@ -1,0 +1,85 @@
+= OAuth Plugin
+
+This is the beginning of a plugin for implementing both OAuth clients and servers in Rails applications.
+
+See the OAuth specs at:
+
+http://oauth.googlecode.com/svn/spec/branches/1.0/drafts/5/spec.html
+
+and the OAuth site at:
+
+http://oauth.net
+
+What is done:
+
+* Create and authenticate RequestTokens
+* Exchange RequestToken for an AccessToken
+* Simple http wrapper built into RequestToken. This has been refactored to fit into the ActiveResource way of doing http requests.
+* Supports query and authorization headers
+
+Still todo:
+
+* Improve error handling (it's virtually non existant)
+* Generators to create Token AR models
+* Generators to create OAuth consumer and provider controllers
+* Integrate with ActiveResource by including AccessToken support in the ActiveResource::Connection class.
+
+== Example Consumer
+
+Create a new consumer instance by passing it a configuration hash:
+
+  @consumer=OAuth::Consumer.new( {
+    :consumer_key=>"key",
+    :consumer_secret=>"secret",
+    :site=>"http://term.ie",
+    :auth_method=>:authorize,
+    :request_token_path=>"/oauth/example/request_token.php",
+    :access_token_path=>"/oauth/example/access_token.php",
+    :authorize_path=>"/oauth/example/authorize.php"
+    })
+
+Start the process by requesting a token
+
+  @request_token=@consumer.get_request_token
+  session[:request_token]=@request_token
+  redirect_to @request_token.authorize_url
+
+When user returns create an access_token
+
+  @access_token=@request_token.get_access_token
+  @photos=@access_token.get('/photos.xml')
+
+== Example Server
+
+To find the consumer_key for a request in a rails app do:
+
+  @consumer_key=OAuth::Request.extract_consumer_key(request)
+
+ To extract an OAuth::Request for a rails request in a rails app do:
+
+  @oauth_request=OAuth::Request.incoming(request)
+  @token=AccessToken.find_by_token @oauth_request.token
+  return @oauth_request.verify?(@token.client_application.secret,@token.secret)
+
+This example assumes an ActiveRecord Model called AccessToken with a token and a secret column.
+This is associated with a ActiveRecord Model ClientApplication (the consumer), which has a key and secret column.
+
+== OAuth Provider generator
+
+While it isn't very flexible at the moment there is an oauth_provider generator which you can use like this:
+
+./script/generate oauth_provider
+
+This generates an oauth_controller as well as the required models.
+
+It requires an authentication framework such as acts_as_authenticated, restful_authentication or restful_open_id_authentication. It also requires Rails 2.0.
+
+== More
+
+The Google Code project is http://code.google.com/p/oauth-plugin/
+
+Please help documentation, patches and testing.
+
+Copyright (c) 2007 Pelle Braendgaard, released under the MIT license
+
+Certain parts of this has been inspired (and kind of stole from Blaine Cooke and Larry Halff's OAuth library)
